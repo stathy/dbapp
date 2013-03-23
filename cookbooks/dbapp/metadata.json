@@ -34,10 +34,14 @@
   "groupings": {
   },
   "recipes": {
+    "dbapp::db_bootstrap": "",
+    "dbapp::db_master": "",
+    "dbapp::db_slave": "",
     "dbapp::default": "",
+    "dbapp::haproxy": "",
     "dbapp::mysql": "",
     "dbapp::status": "",
-    "dbapp::db_bootstrap": ""
+    "dbapp::tomcat": ""
   },
   "version": "1.0.0"
 }

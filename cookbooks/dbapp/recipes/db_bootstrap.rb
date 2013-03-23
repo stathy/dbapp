@@ -18,20 +18,6 @@
 # limitations under the License.
 #
 
-#dbm = search(:node, "apps_dbapp_tier:db AND chef_environment:#{node.chef_environment}").last
-#
-#if node['apps']['dbapp']['tier'].include?('db')
-#  dbm = node
-#end
-#
-#if dbm.nil?
-#  raise( %Q(Unable to find database host with atrribute node['apps']['dbapp']['tier'] = 'db') )
-#
-#else
-#  Chef::Log.info( %Q(Dependent DB node is set to other "#{dbm.name}") )
-#
-#end
-
 cookbook_file "/tmp/schema.sql" do
   source "schema.sql"
   mode 0755
@@ -47,15 +33,16 @@ end
 
 execute "bootstrap database" do
   command %Q(/usr/bin/mysql -u #{node['apps']['dbapp']['db']['username']} -p#{node['apps']['dbapp']['db']['password']} #{node['apps']['dbapp']['db']['name']} < /tmp/schema.sql)
-  action :run
 
-  notifies :create, "ruby_block[rm db_bootstrap from runlist]", :immediately
+  action :run
 end
 
 ruby_block "rm db_bootstrap from runlist" do
   block do
     Chef::Log.info("Database Bootstrap completed, removing the destructive recipe[dbapp::db_bootstrap]")
-    node.run_list.remove("recipe[dbapp::db_bootstrap]") if node.run_list.include?("recipe[dbapp::db_bootstrap]")
+    node.run_list.remove("recipe[dbapp::db_bootstrap]")
   end
-  action :nothing
+  action :create
+
+#  subscribes :create, resources('execute[create database]')
 end

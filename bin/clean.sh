@@ -12,7 +12,6 @@ for n in $NODES; do
   knife client delete "${n}" --yes
   knife node delete "${n}" --yes
 
-  vagrant_n=($(echo "${n}" | tr '-' "\n")) 
-  vagrant destroy "${vagrant_n[1]}" --force
-
 done
+
+vagrant destroy --force

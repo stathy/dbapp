@@ -22,19 +22,18 @@ require 'date'
 
 normal['haproxy']['admin']['address_bind'] = "0.0.0.0"
 normal['haproxy']['member_port'] = "8080"
-default['haproxy']['service']['retries'] = 12
-default['haproxy']['service']['retry_delay'] = 5
-default['haproxy']['search']['retries'] = 12
+default['haproxy']['search']['retries'] = 3
 default['haproxy']['search']['retry_delay'] = 5
 
 normal['mysql']['bind_address'] = node['ipaddress_internal']
 normal['mysql']['server_root_password'] = "mysql_root"
 normal['mysql']['server_repl_password'] = "mysql_repl"
 normal['mysql']['server_debian_password'] = "mysql_debian"
+default['mysql']['search']['retries'] = 3
+default['mysql']['search']['retry_delay'] = 5
 
-default['apps']['dbapp']['search']['retries'] = 12
+default['apps']['dbapp']['search']['retries'] = 3
 default['apps']['dbapp']['search']['retry_delay'] = 5
-
 default['apps']['dbapp']['tier'] = []
 default['apps']['dbapp']['source'] = "http://chef.localdomain:10080/artifacts/dbapp.war"
 default['apps']['dbapp']['checksum'] = "7d93e08aa3f8cccbd95baaf719256b1cbf0401e274281316143631d6669729a1"
