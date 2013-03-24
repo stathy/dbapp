@@ -1,5 +1,7 @@
 #
-# Author:: cookbooks@opscode.com
+# Author:: Stathy Touloumis <stathy@opscode.com>
+# CreatedBy:: Stathy Touloumis <stathy@opscode.com>
+#
 # Cookbook Name:: dbapp
 # Recipe:: tomcat
 #
@@ -40,8 +42,8 @@ end
 link "#{node['tomcat']['context_dir']}/ROOT.xml" do
   to "#{app['deploy_to']}/shared/dbapp.xml"
 
-  notifies :stop, resources(:service => "tomcat")
-  notifies :start, resources(:service => "tomcat")
+  notifies :stop, resources('service[tomcat]')
+  notifies :start, resources('service[tomcat]')
 end
 
 #service "tomcat" do
@@ -84,63 +86,30 @@ end
 
 end
 
-db_search = ruby_block "search for database" do
-  block do
-    dbm = nil
-    if app['tier'].include?('db')
-      dbm = node
-
-    else
-      dbm = search("node", "apps_dbapp_tier:db AND apps_dbapp_db_type:master AND chef_environment:#{node.chef_environment}").last
-
-    end
-
-    if dbm.nil?
-      node.save
-      raise( %Q(Unable to find database host where attribute node['apps']['dbapp']['tier'] contains 'db') )
-
-    else
-      server_ip = begin
-        if dbm.has_key?('ipaddress_internal')
-          dbm['ipaddress_internal']
-        elsif dbm.has_key?('ec2')
-          dbm['ec2']['public_ipv4']
-        elsif ! dbm['ipaddress'].nil?
-          dbm['ipaddress']
-        else
-          dbm['fqdn']
-        end
-      end
-      Chef::Log.info( %Q(Database server ip is "#{server_ip}") )
-      node.run_state['dbm'] = server_ip
-
-    end
-  end
-
+dbapp_orchestrate_db "search for db" do
+  app_name 'dbapp'
   action :nothing
 
   retries app['search']['retries']
   retry_delay app['search']['retry_delay']
-
-  only_if { app.has_key?('db') }
-
-end
-db_search.run_action(:create)
+end.run_action(:search)
 
 template "#{app['deploy_to']}/shared/dbapp.xml" do
-  dbm = node.run_state['dbm']
-
   source "context.xml.erb"
-  owner app[:owner]
-  group app[:group]
+  owner app['owner']
+  group app['group']
   mode "644"
   variables(
-    :host => dbm,
+    :host => node.run_state['dbapp_orchestrate_db::dbm'],
     :app => 'dbapp',
     :database => app['db'],
     :war => "#{app['deploy_to']}/releases/#{app['checksum']}.war"
   )
-  not_if { node.run_state['dbm'].nil? }
+  
+  action :create
+  
+  notifies :stop, resources('service[tomcat]')
+  notifies :start, resources('service[tomcat]')
 end
 
 directory "#{node['tomcat']['webapp_dir']}/ROOT" do
@@ -153,7 +122,8 @@ remote_file 'dbapp artifacts' do
   source app['source']
   mode "0644"
   checksum app['checksum']
-  notifies :delete, resources(:directory => "#{node['tomcat']['webapp_dir']}/ROOT")
+
+  notifies :delete, resources("directory[#{node['tomcat']['webapp_dir']}/ROOT]")
 end
 
 node.default['apps']['dbapp']['tier'] << 'app'

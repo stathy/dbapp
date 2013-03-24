@@ -3,7 +3,7 @@
 # CreatedBy:: Stathy Touloumis <stathy@opscode.com>
 #
 # Cookbook Name:: dbapp
-# Recipe:: default
+# Resource:: orchestrate_db
 #
 # Copyright 2009-2013, Opscode, Inc.
 #
@@ -19,5 +19,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# This is potentially destructive to the nodes mysql password attributes, since
+# we iterate over all the app databags. If this database server provides
+# databases for multiple applications, the last app found in the databags
+# will win out, so make sure the databags have the same passwords set for
+# the root, repl, and debian-sys-maint users.
+#
 
+actions :search
+default_action :search
 
+attribute :name,          :kind_of => String, :name_attribute => true
+
+attribute :app_name,      :kind_of => String, :required => true
+attribute :return_val,    :kind_of => String, :default => 'ip', :regex => /^ip|fqdn$/i
+#attribute :solr_query,    :kind_of => String, :default => %Q()

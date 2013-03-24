@@ -1,5 +1,7 @@
 #
-# Author:: cookbooks@opscode.com
+# Author:: Stathy Touloumis <stathy@opscode.com>
+# CreatedBy:: Stathy Touloumis <stathy@opscode.com>
+#
 # Cookbook Name:: dbapp
 # Recipe:: db_slave
 #
@@ -97,7 +99,7 @@ SQL
     dbh_of_root.query( set_master_sql )
     dbh_of_root.close
 
-    Chef::Log.warn("Set sync info for slave [#{bind_vars[0,1].to_s}, "<password>", #{bind_vars[3,4].to_s}]")
+    Chef::Log.warn( %Q(Set sync info for slave '#{bind_vars[0,1].to_s}, <password>, #{bind_vars[3,4].to_s}') )
   end
 
   action :create

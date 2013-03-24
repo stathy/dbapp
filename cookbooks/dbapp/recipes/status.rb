@@ -1,5 +1,7 @@
 #
-# Author:: cookbooks@opscode.com
+# Author:: Stathy Touloumis <stathy@opscode.com>
+# CreatedBy:: Stathy Touloumis <stathy@opscode.com>
+#
 # Cookbook Name:: dbapp
 # Recipe:: status
 #

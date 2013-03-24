@@ -19,10 +19,10 @@ Vagrant::Config.run do |config|
 	  :ip       => '192.168.65.90',
 	  :memory   => 756,
 	  :env      => 'Advanced',
-	  :run_list => %w( role[base_ubuntu] recipe[dbapp::mysql] recipe[dbapp::db_bootstrap] ),
+	  :run_list => %w( role[base_ubuntu] recipe[dbapp::mysql] recipe[dbapp::db_bootstrap] recipe[dbapp::tomcat] recipe[dbapp::haproxy] ),
 	  :attr     => { 'apps' => { 'dbapp' => { 'rolling_deploy' => { 'bootstrap_group' => ID, } } } }
       },
-      :master_db => {
+      :db_master => {
 	    :ip       => '192.168.65.95',
 	    :memory   => 356,
 	    :env      => 'Advanced',
@@ -32,7 +32,7 @@ Vagrant::Config.run do |config|
 		'apps' => { 'dbapp' => { 'rolling_deploy' => { 'leg' => 'omega' } } }
 	    }
        },
-      :slave_db => {
+      :db_slave => {
 	  :ip       => '192.168.65.96',
 	  :memory   => 356,
 	  :env      => 'Advanced',
@@ -42,7 +42,7 @@ Vagrant::Config.run do |config|
 		'apps' => { 'dbapp' => { 'rolling_deploy' => { 'leg' => 'omega' } } }
 	    }
        },
-      :slave_db_2 => {
+      :db_slave_2 => {
 	  :ip       => '192.168.65.97',
 	  :memory   => 356,
 	  :env      => 'Advanced',
