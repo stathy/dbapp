@@ -20,44 +20,15 @@
 # limitations under the License.
 #
 
-include_recipe "mysql::ruby"
-
-Gem.clear_paths
-require 'mysql'
-
-ruby_block "get master replication file and pos" do
-  block do
-    dbh_of_root = begin
-      connection = ::Mysql.new(
-        'localhost',
-        'root',
-        node['mysql']['server_root_password'],
-        nil,
-        node['mysql']['port']
-      )
-      connection.set_server_option ::Mysql::OPTION_MULTI_STATEMENTS_ON
-      connection
-    end
-
-    dbh_of_root.query("FLUSH TABLES WITH READ LOCK")
-
-    obtain_sync_sql = <<SQL
-      SHOW MASTER STATUS
-SQL
-
-    Chef::Log.warn("Performing query [#{obtain_sync_sql}]")
+dbapp_orchestrate_db "get and set sync point" do
+  app_name 'dbapp'
+  db_type 'mysql'
+  action :nothing
   
-    rslt = dbh_of_root.query( obtain_sync_sql )
-    data = rslt.fetch_row
-    rslt.free
-    dbh_of_root.close
+  retries 2
+  retry_delay 5
 
-    Chef::Log.warn("Obtained sync info for slaves [#{data[0,1].to_s}]")
-    node.normal['mysql']['replication']['log_file'] = data[0]
-    node.normal['mysql']['replication']['position'] = data[1]
-  end
-
-  action :create
+  subscribes :configure_sync_point, resources('service[mysql]'), :immediately
 end
 
 ruby_block "rm db_master from runlist" do
@@ -67,5 +38,4 @@ ruby_block "rm db_master from runlist" do
   end
   action :create
 
-#  subscribes :create, resources('ruby_block[get master replication file and pos]')
 end

@@ -20,4 +20,6 @@
 # limitations under the License.
 #
 
+include_recipe "mysql::ruby"
+
 

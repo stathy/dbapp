@@ -20,6 +20,8 @@
 # limitations under the License.
 #
 
+node.default['apps']['dbapp']['tier'] << 'lb'
+
 include_recipe 'haproxy::default'
 
 lb_search = ruby_block "search for haproxy members" do
@@ -83,6 +85,4 @@ template "/etc/haproxy/haproxy.cfg" do
   notifies :stop, "service[haproxy]"
   notifies :start, "service[haproxy]"
 end
-
-node.default['apps']['dbapp']['tier'] << 'lb'
 

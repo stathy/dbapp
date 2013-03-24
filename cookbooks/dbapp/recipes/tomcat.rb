@@ -28,6 +28,8 @@
 
 include_recipe "tomcat"
 
+node.default['apps']['dbapp']['tier'] << 'app'
+
 app = node['apps']['dbapp']
 
 # remove ROOT application
@@ -92,15 +94,19 @@ dbapp_orchestrate_db "search for db" do
 
   retries app['search']['retries']
   retry_delay app['search']['retry_delay']
+
+  only_if { node.run_state['dbapp_orchestrate_db::dbm'].nil? }
 end.run_action(:search)
 
 template "#{app['deploy_to']}/shared/dbapp.xml" do
+  dbm = node.run_state['dbapp_orchestrate_db::dbm']
+
   source "context.xml.erb"
   owner app['owner']
   group app['group']
   mode "644"
   variables(
-    :host => node.run_state['dbapp_orchestrate_db::dbm'],
+    :host => dbm['server_ip'],
     :app => 'dbapp',
     :database => app['db'],
     :war => "#{app['deploy_to']}/releases/#{app['checksum']}.war"
@@ -126,5 +132,4 @@ remote_file 'dbapp artifacts' do
   notifies :delete, resources("directory[#{node['tomcat']['webapp_dir']}/ROOT]")
 end
 
-node.default['apps']['dbapp']['tier'] << 'app'
 

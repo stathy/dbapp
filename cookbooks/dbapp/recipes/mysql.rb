@@ -26,6 +26,18 @@
 # the root, repl, and debian-sys-maint users.
 #
 
+node.default['apps']['dbapp']['tier'] << 'db'
+
+service "mysql" do
+  retries 5
+  retry_delay 3
+end
+
+template "#{node['mysql']['conf_dir']}/my.cnf" do
+  cookbook 'dbapp'
+  source "my.cnf.erb"
+end
+
 %w{ root repl debian }.each do |user|
   user_pw = node['mysql']["server_#{user}_password"]
 
@@ -64,5 +76,3 @@ execute "mysql install dbapp privileges" do
 
   subscribes :run, resources(:template => "/etc/mysql/app_grants.sql"), :immediately
 end
-
-node.default['apps']['dbapp']['tier'] << 'db'

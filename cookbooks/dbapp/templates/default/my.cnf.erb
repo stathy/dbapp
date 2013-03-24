@@ -132,8 +132,13 @@ log_warnings
 #
 # * Replication
 #
+<% if node['mysql']['replication'] -%>
+server-id = <%= node['mysql']['replication']['id'] %>
 read_only = <%= node['mysql']['read_only'] %>
-
+<%- if node['mysql']['replication']['type'] == 'master' %>
+log-bin = mysql-bin
+<%- end %>
+<%- end %>
 
 #
 # Here you can see queries with especially long duration
