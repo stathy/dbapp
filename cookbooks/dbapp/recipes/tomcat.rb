@@ -82,6 +82,9 @@ end
 
 rolling_deploy_integrate_db "search for db" do
   app_name 'dbapp'
+  unless node['apps']['dbapp']['tier'].include?('db')
+    qry_type 'master'
+  end
   action :nothing
 
   retries app['search']['retries']

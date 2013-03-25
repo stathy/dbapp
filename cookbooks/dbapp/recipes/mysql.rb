@@ -35,28 +35,6 @@ service "mysql" do
   retry_delay 3
 end
 
-rolling_deploy_integrate_db "configure slave to master" do
-  app_name 'dbapp'
-  db_platform 'mysql'
-
-  action :configure_slave
-
-  only_if { node['mysql'].has_key?('replication') && node['mysql']['replication']['type'].match('slave') }
-end
-
-rolling_deploy_integrate_db "get and set sync point" do
-  app_name 'dbapp'
-  db_platform 'mysql'
-  action :nothing
-  
-  retries 2
-  retry_delay 5
-
-  subscribes :query_sync_point!, resources('service[mysql]'), :immediately
-
-  only_if { node['mysql'].has_key?('replication') && node['mysql']['replication']['type'].match('master') }
-end
-
 if node['mysql'].has_key?('replication')
   template "#{node['mysql']['conf_dir']}/my.cnf" do
     cookbook 'dbapp'
@@ -125,3 +103,26 @@ execute "load schema '/tmp/#{app['db_checksum']}.sql'" do
 
   subscribes :run, resources('remote_file[dbapp sql artifact]')
 end
+
+rolling_deploy_integrate_db "get and set sync point" do
+  app_name 'dbapp'
+  db_platform 'mysql'
+  action :nothing
+  
+  retries 2
+  retry_delay 5
+
+  subscribes :query_sync_point!, resources('service[mysql]'), :immediately
+
+  only_if { node['mysql'].has_key?('replication') && node['mysql']['replication']['type'].match('master') }
+end
+
+rolling_deploy_integrate_db "configure slave to master" do
+  app_name 'dbapp'
+  db_platform 'mysql'
+
+  action :configure_slave
+
+  only_if { node['mysql'].has_key?('replication') && node['mysql']['replication']['type'].match('slave') }
+end
+
