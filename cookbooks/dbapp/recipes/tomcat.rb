@@ -80,7 +80,7 @@ end
 
 end
 
-rolling_deploy_orchestrate_db "search for db" do
+rolling_deploy_integrate_db "search for db" do
   app_name 'dbapp'
   action :nothing
 
@@ -115,7 +115,7 @@ directory "#{node['tomcat']['webapp_dir']}/ROOT" do
   action :nothing
 end
 
-remote_file 'dbapp artifacts' do
+remote_file 'dbapp java artifacts' do
   path "#{app['deploy_to']}/releases/#{app['checksum']}.war"
   source app['source']
   mode "0644"

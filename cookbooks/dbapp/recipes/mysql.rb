@@ -35,11 +35,7 @@ service "mysql" do
   retry_delay 3
 end
 
-template "#{node['mysql']['conf_dir']}/my.cnf" do
-  source "my.cnf.erb"
-end
-
-rolling_deploy_orchestrate_db "configure slave to master" do
+rolling_deploy_integrate_db "configure slave to master" do
   app_name 'dbapp'
   db_platform 'mysql'
 
@@ -48,7 +44,7 @@ rolling_deploy_orchestrate_db "configure slave to master" do
   only_if { node['mysql'].has_key?('replication') && node['mysql']['replication']['type'].match('slave') }
 end
 
-rolling_deploy_orchestrate_db "get and set sync point" do
+rolling_deploy_integrate_db "get and set sync point" do
   app_name 'dbapp'
   db_platform 'mysql'
   action :nothing
