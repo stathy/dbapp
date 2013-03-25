@@ -28,6 +28,8 @@
 
 node.default['apps']['dbapp']['tier'] << 'db'
 
+app = node['apps']['dbapp']
+
 service "mysql" do
   retries 5
   retry_delay 3
@@ -101,4 +103,27 @@ execute "mysql install dbapp privileges" do
   action :nothing
 
   subscribes :run, resources(:template => "/etc/mysql/app_grants.sql"), :immediately
+end
+
+remote_file 'dbapp sql artifact' do
+  path "/tmp/#{app['db_checksum']}.sql"
+  source app['db_source']
+  mode "0644"
+  checksum app['db_checksum']
+
+  action :nothing
+end
+
+#This needs to be converted to LWRP's and have the db driver driven through attributes
+execute "init database" do
+  command %Q(/usr/bin/mysql -u root -p#{node['mysql']['server_root_password']} -e "CREATE DATABASE IF NOT EXISTS #{node['apps']['dbapp']['db']['name']};")
+  action :run
+end
+
+execute "load schema '/tmp/#{app['db_checksum']}.sql'" do
+  command %Q(/usr/bin/mysql -u #{node['apps']['dbapp']['db']['username']} -p#{node['apps']['dbapp']['db']['password']} #{node['apps']['dbapp']['db']['name']} < /tmp/#{app['db_checksum']}.sql)
+
+  action :nothing
+  
+  subscribes :run, resources('remote_file[dbapp sql artifact]')
 end
