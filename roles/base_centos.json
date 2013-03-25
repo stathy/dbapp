@@ -11,9 +11,7 @@
   },
   "chef_type": "role",
   "run_list": [
-    "role[base_core]",
-    "recipe[yum::epel]",
-    "recipe[yum]"
+    "role[base_core]"
   ],
   "env_run_lists": {
   }

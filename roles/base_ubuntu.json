@@ -11,8 +11,7 @@
   },
   "chef_type": "role",
   "run_list": [
-    "role[base_core]",
-    "recipe[apt]"
+    "role[base_core]"
   ],
   "env_run_lists": {
   }
