@@ -57,7 +57,7 @@ rolling_deploy_integrate_db "get and set sync point" do
   only_if { node['mysql'].has_key?('replication') && node['mysql']['replication']['type'].match('master') }
 end
 
-if node['mysql'].has_key?['replication']
+if node['mysql'].has_key?('replication')
   template "#{node['mysql']['conf_dir']}/my.cnf" do
     cookbook 'dbapp'
     source "my.cnf.erb"
