@@ -103,6 +103,12 @@ execute "mysql install dbapp privileges" do
   subscribes :run, resources(:template => "/etc/mysql/app_grants.sql"), :immediately
 end
 
+#This needs to be converted to LWRP's and have the db driver driven through attributes
+execute "init database" do
+  command %Q(/usr/bin/mysql -u root -p#{node['mysql']['server_root_password']} -e "CREATE DATABASE IF NOT EXISTS #{node['apps']['dbapp']['db']['name']};")
+  action :run
+end
+
 remote_file 'dbapp sql artifact' do
   path "/tmp/#{app['db_checksum']}.sql"
   source app['db_source']
@@ -112,16 +118,10 @@ remote_file 'dbapp sql artifact' do
   action :create
 end
 
-#This needs to be converted to LWRP's and have the db driver driven through attributes
-execute "init database" do
-  command %Q(/usr/bin/mysql -u root -p#{node['mysql']['server_root_password']} -e "CREATE DATABASE IF NOT EXISTS #{node['apps']['dbapp']['db']['name']};")
-  action :run
-end
-
 execute "load schema '/tmp/#{app['db_checksum']}.sql'" do
   command %Q(/usr/bin/mysql -u #{node['apps']['dbapp']['db']['username']} -p#{node['apps']['dbapp']['db']['password']} #{node['apps']['dbapp']['db']['name']} < /tmp/#{app['db_checksum']}.sql)
 
   action :nothing
-  
+
   subscribes :run, resources('remote_file[dbapp sql artifact]')
 end
