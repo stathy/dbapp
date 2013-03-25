@@ -26,7 +26,7 @@ end
 
 dbapp_orchestrate_db "configure slave to master" do
   app_name 'dbapp'
-  db_type 'mysql'
+  db_platform 'mysql'
 
   action :configure_slave
 end

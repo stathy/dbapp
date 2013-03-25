@@ -22,13 +22,13 @@
 
 dbapp_orchestrate_db "get and set sync point" do
   app_name 'dbapp'
-  db_type 'mysql'
+  db_platform 'mysql'
   action :nothing
   
   retries 2
   retry_delay 5
 
-  subscribes :configure_sync_point, resources('service[mysql]'), :immediately
+  subscribes :query_sync_point!, resources('service[mysql]'), :immediately
 end
 
 ruby_block "rm db_master from runlist" do

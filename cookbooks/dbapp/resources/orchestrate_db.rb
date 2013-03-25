@@ -26,12 +26,13 @@
 # the root, repl, and debian-sys-maint users.
 #
 
-actions :search, :configure_slave, :configure_sync_point
-default_action :search
+actions :search_set_db!, :configure_slave, :query_sync_point!
+default_action :search_set_db!
 
 attribute :name,          :kind_of => String, :name_attribute => true
 attribute :app_name,      :kind_of => String, :required => true
-attribute :db_type,       :kind_of => String, :required => true, :regex => /^mysql$/i
+attribute :db_platform,   :kind_of => String, :required => true, :regex => /^mysql$/
+attribute :type,          :kind_of => String, :default => 'master', :required => true, :regex => /^master|slave$/
 attribute :single,        :kind_of => [ TrueClass, FalseClass ], :default => true
 
 #attribute :return_val,    :kind_of => String, :default => 'ip', :regex => /^ip|fqdn$/i

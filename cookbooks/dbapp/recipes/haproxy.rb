@@ -68,8 +68,7 @@ lb_search = ruby_block "search for haproxy members" do
   retries node[:haproxy][:search][:retries]
   retry_delay node[:haproxy][:search][:retry_delay]
 
-end
-lb_search.run_action(:create)
+end.run_action(:create)
 
 template "/etc/haproxy/haproxy.cfg" do
   pool_members = node.run_state['pool_members'] || []

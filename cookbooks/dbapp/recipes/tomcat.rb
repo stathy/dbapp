@@ -48,14 +48,6 @@ link "#{node['tomcat']['context_dir']}/ROOT.xml" do
   notifies :start, resources('service[tomcat]')
 end
 
-#service "tomcat" do
-#  service_name "tomcat6"
-#  retries 3
-#  retry_delay 5
-#  action [ :stop, :start ]
-#  not_if "test -d #{node['tomcat']['home']}-admin"
-#end
-
 directory app['deploy_to'] do
   owner app['owner']
   group app['group']
@@ -96,7 +88,7 @@ dbapp_orchestrate_db "search for db" do
   retry_delay app['search']['retry_delay']
 
   only_if { node.run_state['dbapp_orchestrate_db::dbm'].nil? }
-end.run_action(:search)
+end.run_action(:search_set_db!)
 
 template "#{app['deploy_to']}/shared/dbapp.xml" do
   dbm = node.run_state['dbapp_orchestrate_db::dbm']

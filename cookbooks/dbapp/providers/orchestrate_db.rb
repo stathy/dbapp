@@ -25,7 +25,7 @@
 # will win out, so make sure the databags have the same passwords set for
 # the root, repl, and debian-sys-maint users.
 
-action :search do
+action :search_set_db! do
   dbm = nil
   name = @new_resource.app_name
 
@@ -38,9 +38,12 @@ action :search do
       chef_environment:#{node.chef_environment}
         AND apps:*
         AND apps_#{name}:*
-        AND apps_#{name}_db:*
+        AND apps_#{name}_tier:*
         AND apps_#{name}_tier:db
-        AND apps_#{name}_db_type:master
+        AND #{@new_resource.db_platform}:*
+        AND #{@new_resource.db_platform}_replication:*
+        AND #{@new_resource.db_platform}_replication_type:*
+        AND #{@new_resource.db_platform}_replication_type:#{@new_resource.type}
 SOLR
     Chef::Log.info( %Q(DB solr query '#{solr_qry}') )
 
@@ -102,13 +105,14 @@ action :configure_slave do
 
   dbapp_orchestrate_db "dbapp_orchestrate_db - search for master" do
     app_name new_resource.app_name
+    db_platform new_resource.db_platform
     action :nothing
   
     retries node['mysql']['search']['retries']
     retry_delay node['mysql']['search']['retry_delay']
   
     only_if { node.run_state['dbapp_orchestrate_db::dbm'].nil? }
-  end.run_action(:search)
+  end.run_action(:search_set_db!)
 
   bind_vars = node.run_state['dbapp_orchestrate_db::dbm']
   Chef::Log.warn( %Q(Set sync info for slave '#{bind_vars.to_s}') )
@@ -132,7 +136,7 @@ SQL
   dbh_of_root.close
 end
 
-action :configure_sync_point do
+action :query_sync_point! do
   dbh_of_root = begin
     connection = ::Mysql.new(
       'localhost',
