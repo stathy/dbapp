@@ -34,6 +34,32 @@ service "mysql" do
 end
 
 template "#{node['mysql']['conf_dir']}/my.cnf" do
+  source "my.cnf.erb"
+end
+
+rolling_deploy_orchestrate_db "configure slave to master" do
+  app_name 'dbapp'
+  db_platform 'mysql'
+
+  action :configure_slave
+
+  only_if { node['mysql'].has_key?('replication') && node['mysql']['replication']['type'].match('slave') }
+end
+
+rolling_deploy_orchestrate_db "get and set sync point" do
+  app_name 'dbapp'
+  db_platform 'mysql'
+  action :nothing
+  
+  retries 2
+  retry_delay 5
+
+  subscribes :query_sync_point!, resources('service[mysql]'), :immediately
+
+  only_if { node['mysql'].has_key?('replication') && node['mysql']['replication']['type'].match('master') }
+end
+
+template "#{node['mysql']['conf_dir']}/my.cnf" do
   cookbook 'dbapp'
   source "my.cnf.erb"
 end

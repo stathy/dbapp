@@ -20,31 +20,44 @@
 # limitations under the License.
 #
 
-cookbook_file "/tmp/schema.sql" do
-  source "schema.sql"
-  mode 0755
-  owner "root"
-  group "root"
+#cookbook_file "/tmp/schema.sql" do
+#  source "schema.sql"
+#  mode 0755
+#  owner "root"
+#  group "root"
+#end
+
+app = node['apps']['dbapp']
+
+remote_file 'dbapp sql artifact' do
+  path "/tmp/#{app['db_checksum']}.sql"
+  source app['db_source']
+  mode "0644"
+  checksum app['db_checksum']
+
+  action :nothing
 end
 
 #This needs to be converted to LWRP's and have the db driver driven through attributes
-execute "create database" do
+execute "init database" do
   command %Q(/usr/bin/mysql -u root -p#{node['mysql']['server_root_password']} -e "CREATE DATABASE IF NOT EXISTS #{node['apps']['dbapp']['db']['name']};")
   action :run
 end
 
-execute "bootstrap database" do
-  command %Q(/usr/bin/mysql -u #{node['apps']['dbapp']['db']['username']} -p#{node['apps']['dbapp']['db']['password']} #{node['apps']['dbapp']['db']['name']} < /tmp/schema.sql)
+execute "load schema '/tmp/#{app['db_checksum']}.sql'" do
+  command %Q(/usr/bin/mysql -u #{node['apps']['dbapp']['db']['username']} -p#{node['apps']['dbapp']['db']['password']} #{node['apps']['dbapp']['db']['name']} < /tmp/#{app['db_checksum']}.sql)
 
-  action :run
+  action :nothing
+  
+  subscribes :run, resources('remote_file[dbapp sql artifact]')
 end
 
-ruby_block "rm db_bootstrap from runlist" do
-  block do
-    Chef::Log.info("Database Bootstrap completed, removing the destructive recipe[dbapp::db_bootstrap]")
-    node.run_list.remove("recipe[dbapp::db_bootstrap]")
-  end
-  action :create
-
-#  subscribes :create, resources('execute[create database]')
-end
+#ruby_block "rm db_bootstrap from runlist" do
+#  block do
+#    Chef::Log.info("Database Bootstrap completed, removing the destructive recipe[dbapp::db_bootstrap]")
+#    node.run_list.remove("recipe[dbapp::db_bootstrap]")
+#  end
+#  action :create
+#
+##  subscribes :create, resources('execute[create database]')
+#end
