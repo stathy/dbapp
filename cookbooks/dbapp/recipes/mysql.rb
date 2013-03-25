@@ -57,9 +57,11 @@ rolling_deploy_integrate_db "get and set sync point" do
   only_if { node['mysql'].has_key?('replication') && node['mysql']['replication']['type'].match('master') }
 end
 
-template "#{node['mysql']['conf_dir']}/my.cnf" do
-  cookbook 'dbapp'
-  source "my.cnf.erb"
+if node['mysql'].has_key?['replication']
+  template "#{node['mysql']['conf_dir']}/my.cnf" do
+    cookbook 'dbapp'
+    source "my.cnf.erb"
+  end
 end
 
 %w{ root repl debian }.each do |user|
@@ -107,7 +109,7 @@ remote_file 'dbapp sql artifact' do
   mode "0644"
   checksum app['db_checksum']
 
-  action :nothing
+  action :create
 end
 
 #This needs to be converted to LWRP's and have the db driver driven through attributes
