@@ -24,7 +24,7 @@ template "#{node['mysql']['conf_dir']}/my.cnf" do
   source "my.cnf.erb"
 end
 
-dbapp_orchestrate_db "configure slave to master" do
+rolling_deploy_orchestrate_db "configure slave to master" do
   app_name 'dbapp'
   db_platform 'mysql'
 

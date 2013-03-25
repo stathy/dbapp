@@ -20,7 +20,7 @@
 # limitations under the License.
 #
 
-dbapp_orchestrate_db "get and set sync point" do
+rolling_deploy_orchestrate_db "get and set sync point" do
   app_name 'dbapp'
   db_platform 'mysql'
   action :nothing

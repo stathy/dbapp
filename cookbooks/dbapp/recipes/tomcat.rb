@@ -80,7 +80,7 @@ end
 
 end
 
-dbapp_orchestrate_db "search for db" do
+rolling_deploy_orchestrate_db "search for db" do
   app_name 'dbapp'
   action :nothing
 
