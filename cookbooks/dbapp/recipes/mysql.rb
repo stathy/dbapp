@@ -33,12 +33,16 @@ app = node['apps']['dbapp']
 service "mysql" do
   retries 5
   retry_delay 3
+  
+  action :nothing
 end
 
 if node['mysql'].has_key?('replication')
   template "#{node['mysql']['conf_dir']}/my.cnf" do
     cookbook 'dbapp'
     source "my.cnf.erb"
+
+    action :nothing
   end
 end
 
@@ -78,13 +82,7 @@ execute "mysql install dbapp privileges" do
   command %Q(/usr/bin/mysql -u root -p"#{node['mysql']['server_root_password']}" < #{grants_path})
   action :nothing
 
-  subscribes :run, resources(:template => "/etc/mysql/app_grants.sql"), :immediately
-end
-
-#This needs to be converted to LWRP's and have the db driver driven through attributes
-execute "init database" do
-  command %Q(/usr/bin/mysql -u root -p#{node['mysql']['server_root_password']} -e "CREATE DATABASE IF NOT EXISTS #{node['apps']['dbapp']['db']['name']};")
-  action :run
+  subscribes :run, resources('template[/etc/mysql/app_grants.sql]'), :immediately
 end
 
 remote_file 'dbapp sql artifact' do
@@ -94,6 +92,14 @@ remote_file 'dbapp sql artifact' do
   checksum app['db_checksum']
 
   action :create
+end
+
+#This needs to be converted to LWRP's and have the db driver driven through attributes
+execute "init database" do
+  command %Q(/usr/bin/mysql -u root -p#{node['mysql']['server_root_password']} -e "CREATE DATABASE IF NOT EXISTS #{node['apps']['dbapp']['db']['name']};")
+  action :nothing
+
+  subscribes :run, resources('remote_file[dbapp sql artifact]'), :immediately
 end
 
 execute "load schema '/tmp/#{app['db_checksum']}.sql'" do
@@ -107,12 +113,8 @@ end
 rolling_deploy_integrate_db "get and set sync point" do
   app_name 'dbapp'
   db_platform 'mysql'
-  action :nothing
-  
-  retries 2
-  retry_delay 5
 
-  subscribes :query_sync_point!, resources('service[mysql]'), :immediately
+  action :query_sync_point!
 
   only_if { node['mysql'].has_key?('replication') && node['mysql']['replication']['type'].match('master') }
 end
