@@ -37,10 +37,15 @@ default['mysql']['search']['retry_delay'] = 5
 default['apps']['dbapp']['search']['retries'] = 3
 default['apps']['dbapp']['search']['retry_delay'] = 5
 default['apps']['dbapp']['tier'] = []
+
+default["apps"]['dbapp']['desired'] = '7d93e08aa3f8cccbd95baaf719256b1cbf0401e274281316143631d6669729a1'
 default['apps']['dbapp']['source'] = 'http://chef.localdomain:10080/artifacts/dbapp.war'
 default['apps']['dbapp']['checksum'] = '7d93e08aa3f8cccbd95baaf719256b1cbf0401e274281316143631d6669729a1'
 default['apps']['dbapp']['db_source'] = 'http://chef.localdomain:10080/artifacts/dbapp.sql'
 default['apps']['dbapp']['db_checksum'] = 'e58440eb202309218aab43402f7d6c98204ab5a62e60e4de5fed909d9524d13e'
+default["apps"]['dbapp']['rolling_deploy']['andon_cord'] = false
+
+
 default['apps']['dbapp']['deploy_to'] = "/srv/dbapp"
 default['apps']['dbapp']['owner'] = "nobody"
 default['apps']['dbapp']['group'] = "nogroup"
