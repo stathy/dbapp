@@ -29,7 +29,7 @@ Vagrant::Config.run do |config|
 	    :run_list => %w( role[base_ubuntu] recipe[dbapp::mysql] ),
 	    :attr     => {
 		'mysql' => { 'replication' => { 'type' => 'master', 'id' => 1 } },
-		'apps' => { 'dbapp' => { 'rolling_deploy' => { 'leg' => 'omega' } } }
+		'apps' => { 'dbapp' => { 'rolling_deploy' => { 'leg' => 'blue' } } }
 	    }
        },
       :db_slave => {
@@ -39,7 +39,7 @@ Vagrant::Config.run do |config|
 	    :run_list => %w( role[base_ubuntu] recipe[dbapp::mysql] ),
 	    :attr     => {
 		'mysql' => { 'replication' => { 'type' => 'slave', 'id' => 2 } },
-		'apps' => { 'dbapp' => { 'rolling_deploy' => { 'leg' => 'omega' } } }
+		'apps' => { 'dbapp' => { 'rolling_deploy' => { 'leg' => 'green' } } }
 	    }
        },
       :db_slave_2 => {
@@ -49,7 +49,7 @@ Vagrant::Config.run do |config|
 	    :run_list => %w( role[base_ubuntu] recipe[dbapp::mysql] ),
 	    :attr     => {
 		'mysql' => { 'replication' => { 'type' => 'slave', 'id' => 3 } },
-		'apps' => { 'dbapp' => { 'rolling_deploy' => { 'leg' => 'omega' } } }
+		'apps' => { 'dbapp' => { 'rolling_deploy' => { 'leg' => 'green' } } }
 	    }
 
        },
@@ -57,21 +57,21 @@ Vagrant::Config.run do |config|
 	  :ip       => '192.168.65.101',
 	  :memory   => 512,
 	  :env      => 'Advanced',
-	  :roles     => %w( base_ubuntu dbapp_app ),
+            :run_list => %w( role[base_ubuntu] recipe[dbapp::tomcat] ),
 	  :attr     => { 'apps' => { 'dbapp' => { 'rolling_deploy' => { 'leg' => 'blue', } } } }
       },
       :app_blue_2 => {
 	  :ip       => '192.168.65.102',
 	  :memory   => 512,
 	  :env      => 'Advanced',
-	  :roles     => %w( base_ubuntu dbapp_app ),
+            :run_list => %w( role[base_ubuntu] recipe[dbapp::tomcat] ),
 	  :attr     => { 'apps' => { 'dbapp' => { 'rolling_deploy' => { 'leg' => 'blue', } } } }
       },
       :app_blue_3 => {
 	  :ip       => '192.168.65.103',
 	  :memory   => 512,
 	  :env      => 'Advanced',
-	  :roles     => %w( base_ubuntu dbapp_app ),
+            :run_list => %w( role[base_ubuntu] recipe[dbapp::tomcat] ),
 	  :attr     => { 'apps' => { 'dbapp' => { 'rolling_deploy' => { 'leg' => 'blue', } } } }
       },
 
@@ -79,21 +79,21 @@ Vagrant::Config.run do |config|
 	  :ip       => '192.168.65.111',
 	  :memory   => 512,
 	  :env      => 'Advanced',
-	  :roles     => %w( base_ubuntu dbapp_app ),
+            :run_list => %w( role[base_ubuntu] recipe[dbapp::tomcat] ),
 	  :attr     => { 'apps' => { 'dbapp' => { 'rolling_deploy' => { 'leg' => 'green', } } } }
       },
       :app_green_2 => {
 	  :ip       => '192.168.65.112',
 	  :memory   => 512,
 	  :env      => 'Advanced',
-	  :roles     => %w( base_ubuntu dbapp_app ),
+            :run_list => %w( role[base_ubuntu] recipe[dbapp::tomcat] ),
 	  :attr     => { 'apps' => { 'dbapp' => { 'rolling_deploy' => { 'leg' => 'green', } } } }
       },
       :app_green_3 => {
 	  :ip       => '192.168.65.113',
 	  :memory   => 512,
 	  :env      => 'Advanced',
-	  :roles     => %w( base_ubuntu dbapp_app ),
+            :run_list => %w( role[base_ubuntu] recipe[dbapp::tomcat] ),
 	  :attr     => { 'apps' => { 'dbapp' => { 'rolling_deploy' => { 'leg' => 'green', } } } }
       },
 
@@ -101,7 +101,7 @@ Vagrant::Config.run do |config|
 	  :ip       => '192.168.65.131',
 	  :memory   => 256,
 	  :env      => 'Advanced',
-	  :roles     => %w( base_ubuntu dbapp_lb ),
+            :run_list => %w( role[base_ubuntu] recipe[dbapp::haproxy] ),
 	  :attr     => { 'apps' => { 'dbapp' => { 'rolling_deploy' => { 'leg' => 'alpha', } } } }
       },
 
@@ -114,10 +114,10 @@ Vagrant::Config.run do |config|
 	vagrant_group = "/#{ chef_env.sub('-','/') }"
 
 	config.vm.define name do |vm_cfg|
-	    vm_cfg.vm.host_name = "#{ name.to_s.sub('_','-') }-dbapp"
-	    if m = vm_cfg.vm.host_name.match(/[0-9]$/) then
-		vm_cfg.vm.host_name.insert(0, "#{m}.")
-	    end
+	    vm_cfg.vm.host_name = "#{ name.to_s.gsub('_','-') }-dbapp"
+	#    if m = vm_cfg.vm.host_name.match(/[0-9]$/) then
+	#	vm_cfg.vm.host_name.insert(0, "#{m}-")
+	#    end
 	    vm_cfg.vm.network :hostonly, cfg[:ip] if cfg[:ip]
 	    vm_cfg.vm.box = cfg[:box] if cfg[:box]
 

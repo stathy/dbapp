@@ -86,6 +86,7 @@ rolling_deploy_integrate_db "search for db" do
     qry_type 'master'
   end
   action :nothing
+  db_platform 'mysql'
 
   retries app['search']['retries']
   retry_delay app['search']['retry_delay']
