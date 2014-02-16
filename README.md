@@ -11,11 +11,11 @@ TO-DO
 License and Author
 ==================
 
-Author:: Stathy Touloumis <stathy@opscode.com
+Author:: Stathy Touloumis <stathy@getchef.com
 
-CreatedBy:: Stathy Touloumis <stathy@opscode.com>
+CreatedBy:: Stathy Touloumis <stathy@getchef.com>
 
-Copyright:: 2013, Opscode, Inc
+Copyright:: 2013, Chef, Inc
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
