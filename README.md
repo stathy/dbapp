@@ -11,7 +11,7 @@ TO-DO
 License and Author
 ==================
 
-Author:: Stathy Touloumis <stathy@getchef.com
+Author:: Stathy Touloumis <stathy@getchef.com>
 
 CreatedBy:: Stathy Touloumis <stathy@getchef.com>
 
